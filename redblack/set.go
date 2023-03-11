@@ -23,6 +23,11 @@ func (s *Set[K]) Keys() []K {
 	return (*Tree[K, struct{}])(s).Keys()
 }
 
+// MinKey returns the minimum element from the set or nil if the set is empty.
+func (s *Set[K]) MinKey() *K {
+	return (*Tree[K, struct{}])(s).MinKey()
+}
+
 // Insert inserts a new element into the set.
 func (s *Set[K]) Insert(key K) bool {
 	_, ok := (*Tree[K, struct{}])(s).Put(key, nil)

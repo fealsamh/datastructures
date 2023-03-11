@@ -53,18 +53,18 @@ type Tree[T any] struct {
 }
 
 // Find finds the root of an in-tree.
-func (n *Tree[T]) Find() *Tree[T] {
-	if n.parent == nil {
-		return n
+func (t *Tree[T]) Find() *Tree[T] {
+	if t.parent == nil {
+		return t
 	}
-	r := n.parent.Find()
-	n.parent = r
+	r := t.parent.Find()
+	t.parent = r
 	return r
 }
 
 // Union merges two sets.
-func (n1 *Tree[T]) Union(n2 *Tree[T]) *Tree[T] {
-	x, y := n1.Find(), n2.Find()
+func (t1 *Tree[T]) Union(n2 *Tree[T]) *Tree[T] {
+	x, y := t1.Find(), n2.Find()
 	if x == y {
 		return x
 	}
@@ -73,11 +73,11 @@ func (n1 *Tree[T]) Union(n2 *Tree[T]) *Tree[T] {
 	}
 	y.parent = x
 	if x.rank == y.rank {
-		x.rank += 1
+		x.rank++
 	}
 	return x
 }
 
-func (n *Tree[T]) String() string {
-	return fmt.Sprintf("%v", n.Value)
+func (t *Tree[T]) String() string {
+	return fmt.Sprintf("%v", t.Value)
 }
