@@ -18,9 +18,14 @@ func (s *Set[K]) Size() int {
 	return (*Tree[K, struct{}])(s).Size()
 }
 
-// Keys returns the elements of the set.
-func (s *Set[K]) Keys() []K {
+// Values returns the elements of the set.
+func (s *Set[K]) Values() []K {
 	return (*Tree[K, struct{}])(s).Keys()
+}
+
+// MinKey returns the minimum element from the set or nil if the set is empty.
+func (s *Set[K]) MinKey() *K {
+	return (*Tree[K, struct{}])(s).MinKey()
 }
 
 // Insert inserts a new element into the set.

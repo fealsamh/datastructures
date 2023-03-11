@@ -34,6 +34,14 @@ func (t *Tree[K, V]) Keys() []K {
 	return t.root.keys()
 }
 
+// MinKey returns the minimum key in the tree or nil if the tree is empty.
+func (t *Tree[K, V]) MinKey() *K {
+	if t.root == nil {
+		return nil
+	}
+	return t.root.minKey()
+}
+
 // Put inserts a new key-value pair into the tree or replaces the value for an existing key.
 func (t *Tree[K, V]) Put(key K, value *V) (*V, bool) {
 	if t.root == nil {

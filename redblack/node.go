@@ -94,6 +94,13 @@ func (n *node[K, V]) keys() []K {
 	return ks
 }
 
+func (n *node[K, V]) minKey() *K {
+	if n.left != nil {
+		return n.left.minKey()
+	}
+	return &n.key
+}
+
 func (n *node[K, V]) str() string {
 	var s string
 	if n.left != nil {
