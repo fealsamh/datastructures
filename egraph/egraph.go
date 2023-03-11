@@ -19,18 +19,15 @@ type eNode struct {
 }
 
 func (n1 *eNode) Compare(n2 *eNode) int {
-	c := len(n1.args) - len(n2.args)
-	if c != 0 {
+	if c := len(n1.args) - len(n2.args); c != 0 {
 		return c
 	}
-	c = strings.Compare(n1.symbol, n2.symbol)
-	if c != 0 {
+	if c := strings.Compare(n1.symbol, n2.symbol); c != 0 {
 		return c
 	}
 	for i, arg1 := range n1.args {
 		arg2 := n2.args[i]
-		c := int(arg1) - int(arg2)
-		if c != 0 {
+		if c := int(arg1) - int(arg2); c != 0 {
 			return c
 		}
 	}
@@ -61,22 +58,37 @@ func New() *Graph {
 
 // Dump dumps the e-graph's e-classes.
 func (g *Graph) Dump() {
-	for _, id := range g.eClasses.Keys() {
-		cls, _ := g.eClasses.Get(id)
-		fmt.Println(len(cls.eNodes.Values()))
-		for _, n := range cls.eNodes.Values() {
-			fmt.Println("-", g.getTerm(n))
-		}
+	for _, clss := range g.Classes() {
+		fmt.Println(clss)
 	}
 }
 
+// Classes returns all the e-classes of the e-graph.
+func (g *Graph) Classes() [][]*logic.Term {
+	processed := make(map[*eClass]struct{})
+	var r [][]*logic.Term
+	for _, id := range g.eClasses.Keys() {
+		cls, _ := g.eClasses.Get(id)
+		if _, ok := processed[cls]; ok {
+			continue
+		}
+		processed[cls] = struct{}{}
+		var terms []*logic.Term
+		for _, n := range cls.eNodes.Values() {
+			terms = append(terms, g.getTerm(n))
+		}
+		r = append(r, terms)
+	}
+	return r
+}
+
 // Merge merges two n-ary terms.
-func (g *Graph) Merge(t1, t2 logic.Term) {
-	_, clsID1, ok := g.getENode(&t1, false)
+func (g *Graph) Merge(t1, t2 *logic.Term) {
+	_, clsID1, ok := g.getENode(t1, false)
 	if !ok {
 		panic(fmt.Sprintf("term '%s' not found in e-graph", t1))
 	}
-	_, clsID2, ok := g.getENode(&t2, false)
+	_, clsID2, ok := g.getENode(t2, false)
 	if !ok {
 		panic(fmt.Sprintf("term '%s' not found in e-graph", t2))
 	}
@@ -84,7 +96,6 @@ func (g *Graph) Merge(t1, t2 logic.Term) {
 }
 
 func (g *Graph) merge(clsID1, clsID2 eClassID) {
-	fmt.Println("merging", clsID1, clsID2)
 	g.eClassIds.MustGet(clsID1).Union(g.eClassIds.MustGet(clsID2))
 	cls1, _ := g.eClasses.Get(clsID1)
 	cls2, _ := g.eClasses.Get(clsID2)
@@ -124,29 +135,33 @@ func (g *Graph) merge(clsID1, clsID2 eClassID) {
 }
 
 // Get retrieves the representative of an n-ary term from the e-graph.
-func (g *Graph) Get(t logic.Term) (*logic.Term, bool) {
-	n, _, ok := g.getENode(&t, false)
+func (g *Graph) Get(t *logic.Term) (*logic.Term, bool) {
+	n, _, ok := g.getENode(t, false)
 	if !ok {
 		return nil, false
 	}
+	clsID, _ := g.hashcons.Get(n)
+	clsID = &g.eClassIds.MustGet(*clsID).Find().Value
+	cls, _ := g.eClasses.Get(*clsID)
+	n = *cls.eNodes.MinKey()
 	return g.getTerm(n), true
 }
 
 func (g *Graph) getTerm(n *eNode) *logic.Term {
-	args := make([]logic.Term, len(n.args))
+	args := make([]*logic.Term, len(n.args))
 	for i, arg := range n.args {
 		cls, ok := g.eClasses.Get(arg)
 		if !ok {
 			panic("e-class must exist at this point")
 		}
-		args[i] = *g.getTerm(*cls.eNodes.MinKey())
+		args[i] = g.getTerm(*cls.eNodes.MinKey())
 	}
 	return &logic.Term{Symbol: n.symbol, Args: args}
 }
 
 // Add adds an n-ary term to the e-graph.
-func (g *Graph) Add(t logic.Term) bool {
-	_, _, ok := g.getENode(&t, true)
+func (g *Graph) Add(t *logic.Term) bool {
+	_, _, ok := g.getENode(t, true)
 	return ok
 }
 
@@ -174,7 +189,7 @@ func (g *Graph) getEClassID(n *eNode, create bool) (eClassID, bool) {
 func (g *Graph) getENode(t *logic.Term, create bool) (*eNode, eClassID, bool) {
 	args := make([]eClassID, len(t.Args))
 	for i, arg := range t.Args {
-		n, clsID, ok := g.getENode(&arg, create)
+		n, clsID, ok := g.getENode(arg, create)
 		if !ok && !create {
 			return n, 0, false
 		}
