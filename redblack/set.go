@@ -2,7 +2,7 @@ package redblack
 
 import "github.com/fealsamh/datastructures/constraints"
 
-// Set is a generic red-black tree.
+// Set is a generic red-black set.
 type Set[K constraints.Comparable[K]] Tree[K, struct{}]
 
 // NewSet creates a new red-black set.
@@ -13,7 +13,7 @@ func (s *Set[K]) Depth() int {
 	return (*Tree[K, struct{}])(s).Depth()
 }
 
-// Size returns the size of the tree.
+// Size returns the size of the set.
 func (s *Set[K]) Size() int {
 	return (*Tree[K, struct{}])(s).Size()
 }
@@ -23,7 +23,7 @@ func (s *Set[K]) Values() []K {
 	return (*Tree[K, struct{}])(s).Keys()
 }
 
-// MinKey returns the minimum element from the set or nil if the set is empty.
+// MinKey returns the minimum element of the set or nil if the set is empty.
 func (s *Set[K]) MinKey() *K {
 	return (*Tree[K, struct{}])(s).MinKey()
 }
