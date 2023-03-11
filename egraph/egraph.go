@@ -1,6 +1,7 @@
 package egraph
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/fealsamh/datastructures/logic"
@@ -17,7 +18,7 @@ type eNode struct {
 	args   []eClassID
 }
 
-func (n1 eNode) Compare(n2 eNode) int {
+func (n1 *eNode) Compare(n2 *eNode) int {
 	c := len(n1.args) - len(n2.args)
 	if c != 0 {
 		return c
@@ -36,13 +37,16 @@ func (n1 eNode) Compare(n2 eNode) int {
 	return 0
 }
 
-type eClass redblack.Set[eNode]
+type eClass struct {
+	eNodes      *redblack.Set[*eNode]
+	parentNodes *redblack.Set[*eNode]
+}
 
 // Graph is an e-graph.
 type Graph struct {
 	maxID     int
 	eClassIds *unionfind.Structure[eClassID]
-	hashcons  *redblack.Tree[eNode, eClassID]
+	hashcons  *redblack.Tree[*eNode, eClassID]
 	eClasses  *redblack.Tree[eClassID, eClass]
 }
 
@@ -50,8 +54,72 @@ type Graph struct {
 func New() *Graph {
 	return &Graph{
 		eClassIds: unionfind.New[eClassID](),
-		hashcons:  redblack.NewTree[eNode, eClassID](),
+		hashcons:  redblack.NewTree[*eNode, eClassID](),
 		eClasses:  redblack.NewTree[eClassID, eClass](),
+	}
+}
+
+// Dump dumps the e-graph's e-classes.
+func (g *Graph) Dump() {
+	for _, id := range g.eClasses.Keys() {
+		cls, _ := g.eClasses.Get(id)
+		fmt.Println(len(cls.eNodes.Values()))
+		for _, n := range cls.eNodes.Values() {
+			fmt.Println("-", g.getTerm(n))
+		}
+	}
+}
+
+// Merge merges two n-ary terms.
+func (g *Graph) Merge(t1, t2 logic.Term) {
+	_, clsID1, ok := g.getENode(&t1, false)
+	if !ok {
+		panic(fmt.Sprintf("term '%s' not found in e-graph", t1))
+	}
+	_, clsID2, ok := g.getENode(&t2, false)
+	if !ok {
+		panic(fmt.Sprintf("term '%s' not found in e-graph", t2))
+	}
+	g.merge(clsID1, clsID2)
+}
+
+func (g *Graph) merge(clsID1, clsID2 eClassID) {
+	fmt.Println("merging", clsID1, clsID2)
+	g.eClassIds.MustGet(clsID1).Union(g.eClassIds.MustGet(clsID2))
+	cls1, _ := g.eClasses.Get(clsID1)
+	cls2, _ := g.eClasses.Get(clsID2)
+	if cls1 == cls2 {
+		return
+	}
+	for _, cls := range cls2.eNodes.Values() {
+		cls1.eNodes.Insert(cls)
+	}
+	for _, cls := range cls2.parentNodes.Values() {
+		cls1.parentNodes.Insert(cls)
+	}
+	for _, id := range g.eClasses.Keys() { // TODO: optimise iteration
+		cls, _ := g.eClasses.Get(id)
+		if cls == cls2 {
+			g.eClasses.Put(id, cls1)
+		}
+	}
+	parentNodes := cls1.parentNodes.Values()
+	// preserving the congruence invariant
+	for i, n1 := range parentNodes {
+		for j := i + 1; j < len(parentNodes); j++ {
+			n2 := parentNodes[j]
+			if n1.symbol == n2.symbol && len(n1.args) == len(n2.args) {
+				for k, arg1 := range n1.args {
+					arg2 := n2.args[k]
+					if g.eClassIds.MustGet(arg1).Find() != g.eClassIds.MustGet(arg2).Find() {
+						return
+					}
+				}
+				id1, _ := g.hashcons.Get(n1)
+				id2, _ := g.hashcons.Get(n2)
+				g.merge(*id1, *id2)
+			}
+		}
 	}
 }
 
@@ -61,14 +129,17 @@ func (g *Graph) Get(t logic.Term) (*logic.Term, bool) {
 	if !ok {
 		return nil, false
 	}
-	return g.getTerm(&n), true
+	return g.getTerm(n), true
 }
 
 func (g *Graph) getTerm(n *eNode) *logic.Term {
 	args := make([]logic.Term, len(n.args))
 	for i, arg := range n.args {
-		cls, _ := g.eClasses.Get(arg)
-		args[i] = *g.getTerm((*redblack.Set[eNode])(cls).MinKey())
+		cls, ok := g.eClasses.Get(arg)
+		if !ok {
+			panic("e-class must exist at this point")
+		}
+		args[i] = *g.getTerm(*cls.eNodes.MinKey())
 	}
 	return &logic.Term{Symbol: n.symbol, Args: args}
 }
@@ -79,7 +150,7 @@ func (g *Graph) Add(t logic.Term) bool {
 	return ok
 }
 
-func (g *Graph) getEClassID(n eNode, create bool) (eClassID, bool) {
+func (g *Graph) getEClassID(n *eNode, create bool) (eClassID, bool) {
 	clsID, ok := g.hashcons.Get(n)
 	if !ok {
 		if create {
@@ -87,9 +158,12 @@ func (g *Graph) getEClassID(n eNode, create bool) (eClassID, bool) {
 			clsID := eClassID(g.maxID)
 			g.eClassIds.Add(clsID)
 			g.hashcons.Put(n, &clsID)
-			cls := redblack.NewSet[eNode]()
-			cls.Insert(n)
-			g.eClasses.Put(clsID, (*eClass)(cls))
+			cls := &eClass{
+				eNodes:      redblack.NewSet[*eNode](),
+				parentNodes: redblack.NewSet[*eNode](),
+			}
+			cls.eNodes.Insert(n)
+			g.eClasses.Put(clsID, cls)
 			return clsID, false
 		}
 		return 0, false
@@ -97,7 +171,7 @@ func (g *Graph) getEClassID(n eNode, create bool) (eClassID, bool) {
 	return g.eClassIds.MustGet(*clsID).Find().Value, true
 }
 
-func (g *Graph) getENode(t *logic.Term, create bool) (eNode, eClassID, bool) {
+func (g *Graph) getENode(t *logic.Term, create bool) (*eNode, eClassID, bool) {
 	args := make([]eClassID, len(t.Args))
 	for i, arg := range t.Args {
 		n, clsID, ok := g.getENode(&arg, create)
@@ -106,8 +180,14 @@ func (g *Graph) getENode(t *logic.Term, create bool) (eNode, eClassID, bool) {
 		}
 		args[i] = clsID
 	}
-	n := eNode{symbol: t.Symbol, args: args}
+	n := &eNode{symbol: t.Symbol, args: args}
 	clsID, ok := g.getEClassID(n, create)
+	if !ok && create {
+		for _, arg := range n.args {
+			cls, _ := g.eClasses.Get(arg)
+			cls.parentNodes.Insert(n)
+		}
+	}
 	return n, clsID, ok
 }
 

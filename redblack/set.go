@@ -18,8 +18,8 @@ func (s *Set[K]) Size() int {
 	return (*Tree[K, struct{}])(s).Size()
 }
 
-// Keys returns the elements of the set.
-func (s *Set[K]) Keys() []K {
+// Values returns the elements of the set.
+func (s *Set[K]) Values() []K {
 	return (*Tree[K, struct{}])(s).Keys()
 }
 
