@@ -1,12 +1,14 @@
 package logic
 
+import "strings"
+
 // Term is an n-ary term.
 type Term struct {
 	Symbol string
-	Args   []Term
+	Args   []*Term
 }
 
-func (t Term) String() string {
+func (t *Term) String() string {
 	s := t.Symbol
 	if len(t.Args) > 0 {
 		s += "("
@@ -21,11 +23,29 @@ func (t Term) String() string {
 	return s
 }
 
-// NewTerm creates a new n-ary term.
-func NewTerm(symbol string, args ...string) Term {
-	targs := make([]Term, len(args))
-	for i, arg := range args {
-		targs[i] = Term{Symbol: arg}
+// Compare compares two n-ary terms using shortlex order.
+func (t1 *Term) Compare(t2 *Term) int {
+	if c := len(t1.Args) - len(t2.Args); c != 0 {
+		return c
 	}
-	return Term{Symbol: symbol, Args: targs}
+
+	if c := strings.Compare(t1.Symbol, t2.Symbol); c != 0 {
+		return c
+	}
+	for i, arg1 := range t1.Args {
+		arg2 := t2.Args[i]
+		if c := arg1.Compare(arg2); c != 0 {
+			return c
+		}
+	}
+	return 0
+}
+
+// NewTerm creates a new n-ary term.
+func NewTerm(symbol string, args ...string) *Term {
+	targs := make([]*Term, len(args))
+	for i, arg := range args {
+		targs[i] = &Term{Symbol: arg}
+	}
+	return &Term{Symbol: symbol, Args: targs}
 }
