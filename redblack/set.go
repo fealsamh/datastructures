@@ -25,25 +25,8 @@ func (s *Set[K]) Keys() []K {
 
 // Insert inserts a new element into the set.
 func (s *Set[K]) Insert(key K) bool {
-	t := (*Tree[K, struct{}])(s)
-	if t.root == nil {
-		t.root = &node[K, struct{}]{key: key, value: nil, color: black, tree: t}
-		return false
-	}
-	n, dir := t.root.find(key)
-	switch dir {
-	case exact:
-		return true
-	case left:
-		l := &node[K, struct{}]{key: key, value: nil, color: red, parent: n, tree: t}
-		n.left = l
-		l.ensureInvariants()
-	case right:
-		l := &node[K, struct{}]{key: key, value: nil, color: red, parent: n, tree: t}
-		n.right = l
-		l.ensureInvariants()
-	}
-	return false
+	_, ok := (*Tree[K, struct{}])(s).Put(key, nil)
+	return ok
 }
 
 // Contains returns true if the element is found in the set.
