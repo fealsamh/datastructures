@@ -73,11 +73,11 @@ func (g *Graph) Classes() [][]*logic.Term {
 			continue
 		}
 		processed[cls] = struct{}{}
-		var terms []*logic.Term
+		terms := redblack.NewSet[*logic.Term]()
 		for _, n := range cls.eNodes.Values() {
-			terms = append(terms, g.getTerm(n))
+			terms.Insert(g.getTerm(n))
 		}
-		r = append(r, terms)
+		r = append(r, terms.Values())
 	}
 	return r
 }
