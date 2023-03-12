@@ -12,6 +12,7 @@ import (
 type String string
 
 // Compare compares two interned strings.
+
 func (s1 String) Compare(s2 String) int {
 	return strings.Compare(string(s1), string(s2))
 }
