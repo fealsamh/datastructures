@@ -94,6 +94,16 @@ func (n *node[K, V]) keys() []K {
 	return ks
 }
 
+func (n *node[K, V]) enumerate(f func(K, *V)) {
+	if n.left != nil {
+		n.left.enumerate(f)
+	}
+	f(n.key, n.value)
+	if n.right != nil {
+		n.right.enumerate(f)
+	}
+}
+
 func (n *node[K, V]) minKey() *K {
 	if n.left != nil {
 		return n.left.minKey()
