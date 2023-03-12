@@ -24,16 +24,16 @@ func (t *Term) String() string {
 }
 
 // Compare compares two n-ary terms using shortlex order.
-func (t1 *Term) Compare(t2 *Term) int {
-	if c := len(t1.Args) - len(t2.Args); c != 0 {
+func (t *Term) Compare(t2 *Term) int {
+	if c := len(t.Args) - len(t2.Args); c != 0 {
 		return c
 	}
 
-	if c := strings.Compare(t1.Symbol, t2.Symbol); c != 0 {
+	if c := strings.Compare(t.Symbol, t2.Symbol); c != 0 {
 		return c
 	}
 
-	for i, arg1 := range t1.Args {
+	for i, arg1 := range t.Args {
 		arg2 := t2.Args[i]
 		if c := arg1.Compare(arg2); c != 0 {
 			return c

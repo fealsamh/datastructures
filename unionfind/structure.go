@@ -5,26 +5,27 @@ import (
 
 	"github.com/fealsamh/datastructures/constraints"
 	"github.com/fealsamh/datastructures/redblack"
+	"github.com/fealsamh/datastructures/sahuaro"
 )
 
 // Structure is a union-find structure.
 type Structure[T constraints.Comparable[T]] struct {
-	values *redblack.Tree[T, Tree[T]]
+	values *redblack.Tree[T, sahuaro.Tree[T]]
 }
 
 // New creates a new union-find structure.
 func New[T constraints.Comparable[T]]() *Structure[T] {
 	return &Structure[T]{
-		values: redblack.NewTree[T, Tree[T]](),
+		values: redblack.NewTree[T, sahuaro.Tree[T]](),
 	}
 }
 
 // Add adds a value to a union-find structure.
-func (s *Structure[T]) Add(val T) (*Tree[T], bool) {
+func (s *Structure[T]) Add(val T) (*sahuaro.Tree[T], bool) {
 	if n, ok := s.values.Get(val); ok {
 		return n, true
 	}
-	n := &Tree[T]{
+	n := &sahuaro.Tree[T]{
 		Value: val,
 	}
 	s.values.Put(val, n)
@@ -32,52 +33,15 @@ func (s *Structure[T]) Add(val T) (*Tree[T], bool) {
 }
 
 // Get retrieves an in-tree from a union-find structure.
-func (s *Structure[T]) Get(val T) (*Tree[T], bool) {
+func (s *Structure[T]) Get(val T) (*sahuaro.Tree[T], bool) {
 	return s.values.Get(val)
 }
 
 // MustGet retrieves an in-tree from a union-find structure. It panics if the value isn't found.
-func (s *Structure[T]) MustGet(val T) *Tree[T] {
+func (s *Structure[T]) MustGet(val T) *sahuaro.Tree[T] {
 	n, ok := s.values.Get(val)
 	if !ok {
 		panic(fmt.Sprintf("value '%v' not found in union-find structure", val))
 	}
 	return n
-}
-
-// Tree is an in-tree.
-type Tree[T any] struct {
-	Value  T
-	parent *Tree[T]
-	rank   int
-}
-
-// Find finds the root of an in-tree.
-func (t *Tree[T]) Find() *Tree[T] {
-	if t.parent == nil {
-		return t
-	}
-	r := t.parent.Find()
-	t.parent = r
-	return r
-}
-
-// Union merges two sets.
-func (t1 *Tree[T]) Union(n2 *Tree[T]) *Tree[T] {
-	x, y := t1.Find(), n2.Find()
-	if x == y {
-		return x
-	}
-	if x.rank < y.rank {
-		x, y = y, x
-	}
-	y.parent = x
-	if x.rank == y.rank {
-		x.rank++
-	}
-	return x
-}
-
-func (t *Tree[T]) String() string {
-	return fmt.Sprintf("%v", t.Value)
 }
