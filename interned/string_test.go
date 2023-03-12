@@ -21,4 +21,5 @@ func TestInternedString(t *testing.T) {
 
 	a.True((*reflect.StringHeader)(unsafe.Pointer(&s1)).Data != (*reflect.StringHeader)(unsafe.Pointer(&s2)).Data)
 	a.True((*reflect.StringHeader)(unsafe.Pointer(&is1)).Data == (*reflect.StringHeader)(unsafe.Pointer(&is2)).Data)
+	a.True(is1.Eq(&is2))
 }
