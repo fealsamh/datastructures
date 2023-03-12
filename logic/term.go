@@ -32,6 +32,7 @@ func (t1 *Term) Compare(t2 *Term) int {
 	if c := strings.Compare(t1.Symbol, t2.Symbol); c != 0 {
 		return c
 	}
+
 	for i, arg1 := range t1.Args {
 		arg2 := t2.Args[i]
 		if c := arg1.Compare(arg2); c != 0 {
