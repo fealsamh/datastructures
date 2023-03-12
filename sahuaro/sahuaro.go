@@ -20,8 +20,8 @@ func (t *Tree[T]) Find() *Tree[T] {
 }
 
 // Union merges two sets.
-func (t1 *Tree[T]) Union(t2 *Tree[T]) *Tree[T] {
-	x, y := t1.Find(), t2.Find()
+func (t *Tree[T]) Union(t2 *Tree[T]) *Tree[T] {
+	x, y := t.Find(), t2.Find()
 	if x == y {
 		return x
 	}
