@@ -20,10 +20,10 @@ func (t *Tree[T]) Find() *Tree[T] {
 }
 
 // Union merges two sets.
-func (t *Tree[T]) Union(t2 *Tree[T]) *Tree[T] {
+func (t *Tree[T]) Union(t2 *Tree[T]) (*Tree[T], bool) {
 	x, y := t.Find(), t2.Find()
 	if x == y {
-		return x
+		return x, true
 	}
 	if x.rank < y.rank {
 		x, y = y, x
@@ -32,7 +32,7 @@ func (t *Tree[T]) Union(t2 *Tree[T]) *Tree[T] {
 	if x.rank == y.rank {
 		x.rank++
 	}
-	return x
+	return x, false
 }
 
 func (t *Tree[T]) String() string {

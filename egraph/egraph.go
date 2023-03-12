@@ -97,12 +97,11 @@ func (g *Graph) Merge(t1, t2 *logic.Term) {
 }
 
 func (g *Graph) merge(clsID1, clsID2 *sahuaro.Tree[eClassID]) {
-	clsID1.Union(clsID2)
-	cls1, _ := g.eClasses.Get(clsID1.Value)
-	cls2, _ := g.eClasses.Get(clsID2.Value)
-	if cls1 == cls2 {
+	if _, equiv := clsID1.Union(clsID2); equiv {
 		return
 	}
+	cls1, _ := g.eClasses.Get(clsID1.Value)
+	cls2, _ := g.eClasses.Get(clsID2.Value)
 	for _, cls := range cls2.eNodes.Values() {
 		cls1.eNodes.Insert(cls)
 	}
