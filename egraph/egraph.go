@@ -6,6 +6,7 @@ import (
 
 	"github.com/fealsamh/datastructures/logic"
 	"github.com/fealsamh/datastructures/redblack"
+	"github.com/fealsamh/datastructures/sahuaro"
 	"github.com/fealsamh/datastructures/unionfind"
 )
 
@@ -225,7 +226,7 @@ func (g *Graph) IsCanonicalENode(n eNode) bool {
 // CheckEClassMap checks whether the e-class map is valid.
 func (g *Graph) CheckEClassMap() bool {
 	type pair struct {
-		canonicalEClassID *unionfind.Tree[eClassID]
+		canonicalEClassID *sahuaro.Tree[eClassID]
 		cls               *eClass
 	}
 	var pairs []pair
