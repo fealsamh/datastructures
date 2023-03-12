@@ -3,7 +3,6 @@ package egraph
 import (
 	"fmt"
 	"strings"
-	"unsafe"
 
 	"github.com/fealsamh/datastructures/logic"
 	"github.com/fealsamh/datastructures/redblack"
@@ -29,7 +28,7 @@ func (n1 *eNode) Compare(n2 *eNode) int {
 	}
 	for i, arg1 := range n1.args {
 		arg2 := n2.args[i]
-		if c := uintptr(unsafe.Pointer(arg1)) - uintptr(unsafe.Pointer(arg2)); c != 0 {
+		if c := arg1.Value - arg2.Value; c != 0 {
 			return int(c)
 		}
 	}
@@ -110,12 +109,11 @@ func (g *Graph) merge(clsID1, clsID2 *sahuaro.Tree[eClassID]) {
 	for _, cls := range cls2.parentNodes.Values() {
 		cls1.parentNodes.Insert(cls)
 	}
-	for _, id := range g.eClasses.Keys() { // TODO: optimise iteration
-		cls, _ := g.eClasses.Get(id)
+	g.eClasses.Enumerate(func(id eClassID, cls *eClass) {
 		if cls == cls2 {
 			g.eClasses.Put(id, cls1)
 		}
-	}
+	})
 	parentNodes := cls1.parentNodes.Values()
 	// preserving the congruence invariant
 	for i, n1 := range parentNodes {
@@ -143,8 +141,7 @@ func (g *Graph) Get(t *logic.Term) (*logic.Term, bool) {
 		return nil, false
 	}
 	clsID, _ := g.hashcons.Get(n)
-	tr := clsID.Find()
-	cls, _ := g.eClasses.Get(tr.Value)
+	cls, _ := g.eClasses.Get(clsID.Value)
 	n = *cls.eNodes.MinKey()
 	return g.getTerm(n), true
 }
