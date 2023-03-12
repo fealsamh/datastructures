@@ -1,7 +1,9 @@
 package interned
 
 import (
+	"reflect"
 	"strings"
+	"unsafe"
 
 	"github.com/fealsamh/datastructures/unionfind"
 )
@@ -10,7 +12,14 @@ import (
 type String string
 
 // Compare compares two interned strings.
-func (s1 String) Compare(s2 String) int { return strings.Compare(string(s1), string(s2)) }
+func (s1 String) Compare(s2 String) int {
+	return strings.Compare(string(s1), string(s2))
+}
+
+// Eq checks two interned strings for equality.
+func (s1 *String) Eq(s2 *String) bool {
+	return (*reflect.StringHeader)(unsafe.Pointer(s1)).Data == (*reflect.StringHeader)(unsafe.Pointer(s2)).Data
+}
 
 // StringPool is a pool of interned strings.
 type StringPool struct {
