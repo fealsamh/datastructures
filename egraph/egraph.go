@@ -28,8 +28,8 @@ func (n1 *eNode) Compare(n2 *eNode) int {
 	}
 	for i, arg1 := range n1.args {
 		arg2 := n2.args[i]
-		if c := arg1.Value - arg2.Value; c != 0 {
-			return int(c)
+		if c := int(arg1.Value) - int(arg2.Value); c != 0 {
+			return c
 		}
 	}
 	return 0
