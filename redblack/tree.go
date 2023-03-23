@@ -74,6 +74,33 @@ func (t *Tree[K, V]) Put(key K, value *V) (*V, bool) {
 	return nil, false
 }
 
+// GetElsePut returns the value for the given key or inserts a new key-value pair into the tree.
+func (t *Tree[K, V]) GetElsePut(key K, fnValue func() *V) (*V, bool) {
+	if t.root == nil {
+		value := fnValue()
+		t.root = &node[K, V]{key: key, value: value, color: black, tree: t}
+		return value, false
+	}
+	n, dir := t.root.find(key)
+	switch dir {
+	case exact:
+		return n.value, true
+	case left:
+		value := fnValue()
+		l := &node[K, V]{key: key, value: value, color: red, parent: n, tree: t}
+		n.left = l
+		l.ensureInvariants()
+		return value, false
+	case right:
+		value := fnValue()
+		l := &node[K, V]{key: key, value: value, color: red, parent: n, tree: t}
+		n.right = l
+		l.ensureInvariants()
+		return value, false
+	}
+	return nil, false
+}
+
 // Get returns the value for the given key or nil if the key can't be found.
 func (t *Tree[K, V]) Get(key K) (*V, bool) {
 	if t.root == nil {
