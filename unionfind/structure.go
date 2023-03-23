@@ -22,14 +22,11 @@ func New[T constraints.Comparable[T]]() *Structure[T] {
 
 // Add adds a value to a union-find structure.
 func (s *Structure[T]) Add(val T) (*sahuaro.Tree[T], bool) {
-	if n, ok := s.values.Get(val); ok {
-		return n, true
-	}
-	n := &sahuaro.Tree[T]{
-		Value: val,
-	}
-	s.values.Put(val, n)
-	return n, false
+	return s.values.GetElsePut(val, func() *sahuaro.Tree[T] {
+		return &sahuaro.Tree[T]{
+			Value: val,
+		}
+	})
 }
 
 // Get retrieves an in-tree from a union-find structure.
@@ -37,7 +34,8 @@ func (s *Structure[T]) Get(val T) (*sahuaro.Tree[T], bool) {
 	return s.values.Get(val)
 }
 
-// MustGet retrieves an in-tree from a union-find structure. It panics if the value isn't found.
+// MustGet retrieves an in-tree from a union-find structure.
+// It panics if the value isn't found.
 func (s *Structure[T]) MustGet(val T) *sahuaro.Tree[T] {
 	n, ok := s.values.Get(val)
 	if !ok {
