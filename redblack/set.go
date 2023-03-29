@@ -30,7 +30,7 @@ func (s *Set[K]) MinKey() *K {
 
 // Insert inserts a new element into the set.
 func (s *Set[K]) Insert(key K) bool {
-	_, ok := (*Tree[K, struct{}])(s).Put(key, nil)
+	_, ok := (*Tree[K, struct{}])(s).Put(key, struct{}{})
 	return ok
 }
 

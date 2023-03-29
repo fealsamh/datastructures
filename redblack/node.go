@@ -23,7 +23,7 @@ const (
 
 type node[K constraints.Comparable[K], V any] struct {
 	key    K
-	value  *V
+	value  V
 	color  color
 	parent *node[K, V]
 	tree   *Tree[K, V]
@@ -94,7 +94,7 @@ func (n *node[K, V]) keys() []K {
 	return ks
 }
 
-func (n *node[K, V]) enumerate(f func(K, *V)) {
+func (n *node[K, V]) enumerate(f func(K, V)) {
 	if n.left != nil {
 		n.left.enumerate(f)
 	}

@@ -35,7 +35,7 @@ func (t *Tree[K, V]) Keys() []K {
 }
 
 // Enumerate enumerates all the items in the tree.
-func (t *Tree[K, V]) Enumerate(f func(K, *V)) {
+func (t *Tree[K, V]) Enumerate(f func(K, V)) {
 	if t.root == nil {
 		return
 	}
@@ -51,17 +51,18 @@ func (t *Tree[K, V]) MinKey() *K {
 }
 
 // Put inserts a new key-value pair into the tree or replaces the value for an existing key.
-func (t *Tree[K, V]) Put(key K, value *V) (*V, bool) {
+func (t *Tree[K, V]) Put(key K, value V) (oldValue V, updated bool) {
 	if t.root == nil {
 		t.root = &node[K, V]{key: key, value: value, color: black, tree: t}
-		return nil, false
+		return
 	}
 	n, dir := t.root.find(key)
 	switch dir {
 	case exact:
-		oldValue := n.value
+		oldValue = n.value
 		n.value = value
-		return oldValue, true
+		updated = true
+		return
 	case left:
 		l := &node[K, V]{key: key, value: value, color: red, parent: n, tree: t}
 		n.left = l
@@ -71,46 +72,46 @@ func (t *Tree[K, V]) Put(key K, value *V) (*V, bool) {
 		n.right = l
 		l.ensureInvariants()
 	}
-	return nil, false
+	return
 }
 
 // GetElsePut returns the value for the given key or inserts a new key-value pair into the tree.
-func (t *Tree[K, V]) GetElsePut(key K, fnValue func() *V) (*V, bool) {
+func (t *Tree[K, V]) GetElsePut(key K, fnValue func() V) (retValue V, updated bool) {
 	if t.root == nil {
-		value := fnValue()
-		t.root = &node[K, V]{key: key, value: value, color: black, tree: t}
-		return value, false
+		retValue = fnValue()
+		t.root = &node[K, V]{key: key, value: retValue, color: black, tree: t}
+		return
 	}
 	n, dir := t.root.find(key)
 	switch dir {
 	case exact:
 		return n.value, true
 	case left:
-		value := fnValue()
-		l := &node[K, V]{key: key, value: value, color: red, parent: n, tree: t}
+		retValue = fnValue()
+		l := &node[K, V]{key: key, value: retValue, color: red, parent: n, tree: t}
 		n.left = l
 		l.ensureInvariants()
-		return value, false
+		return
 	case right:
-		value := fnValue()
-		l := &node[K, V]{key: key, value: value, color: red, parent: n, tree: t}
+		retValue = fnValue()
+		l := &node[K, V]{key: key, value: retValue, color: red, parent: n, tree: t}
 		n.right = l
 		l.ensureInvariants()
-		return value, false
+		return
 	}
-	return nil, false
+	return
 }
 
 // Get returns the value for the given key or nil if the key can't be found.
-func (t *Tree[K, V]) Get(key K) (*V, bool) {
+func (t *Tree[K, V]) Get(key K) (retValue V, found bool) {
 	if t.root == nil {
-		return nil, false
+		return
 	}
 	n, dir := t.root.find(key)
 	if dir == exact {
 		return n.value, true
 	}
-	return nil, false
+	return
 }
 
 // String returns the textual representation of the tree.

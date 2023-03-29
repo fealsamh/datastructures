@@ -44,16 +44,16 @@ type eClass struct {
 type Graph struct {
 	maxID     int
 	eClassIds *unionfind.Structure[eClassID]
-	hashcons  *redblack.Tree[*eNode, sahuaro.Tree[eClassID]]
-	eClasses  *redblack.Tree[eClassID, eClass]
+	hashcons  *redblack.Tree[*eNode, *sahuaro.Tree[eClassID]]
+	eClasses  *redblack.Tree[eClassID, *eClass]
 }
 
 // New creates a new e-graph.
 func New() *Graph {
 	return &Graph{
 		eClassIds: unionfind.New[eClassID](),
-		hashcons:  redblack.NewTree[*eNode, sahuaro.Tree[eClassID]](),
-		eClasses:  redblack.NewTree[eClassID, eClass](),
+		hashcons:  redblack.NewTree[*eNode, *sahuaro.Tree[eClassID]](),
+		eClasses:  redblack.NewTree[eClassID, *eClass](),
 	}
 }
 
