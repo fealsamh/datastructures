@@ -48,7 +48,7 @@ type Graph struct {
 	eClasses  *redblack.Tree[eClassID, eClass]
 }
 
-// New create a new e-graph.
+// New creates a new e-graph.
 func New() *Graph {
 	return &Graph{
 		eClassIds: unionfind.New[eClassID](),
