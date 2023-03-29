@@ -10,13 +10,13 @@ import (
 
 // Structure is a union-find structure.
 type Structure[T constraints.Comparable[T]] struct {
-	values *redblack.Tree[T, sahuaro.Tree[T]]
+	values *redblack.Tree[T, *sahuaro.Tree[T]]
 }
 
 // New creates a new union-find structure.
 func New[T constraints.Comparable[T]]() *Structure[T] {
 	return &Structure[T]{
-		values: redblack.NewTree[T, sahuaro.Tree[T]](),
+		values: redblack.NewTree[T, *sahuaro.Tree[T]](),
 	}
 }
 
