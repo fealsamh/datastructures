@@ -10,6 +10,18 @@ type Tree[K constraints.Comparable[K], V any] struct {
 // NewTree creates a new red-black tree.
 func NewTree[K constraints.Comparable[K], V any]() *Tree[K, V] { return new(Tree[K, V]) }
 
+// NewTreeFromMap creates a new red-black tree from an in-built map.
+func NewTreeFromMap[K interface {
+	constraints.Comparable[K]
+	comparable
+}, V any](m map[K]V) *Tree[K, V] {
+	tr := NewTree[K, V]()
+	for k, v := range m {
+		tr.Put(k, v)
+	}
+	return tr
+}
+
 // Depth returns the depth of the tree.
 func (t *Tree[K, V]) Depth() int {
 	if t.root == nil {
