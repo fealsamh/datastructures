@@ -35,11 +35,11 @@ func (t *Tree[K, V]) Keys() []K {
 }
 
 // Enumerate enumerates all the items in the tree.
-func (t *Tree[K, V]) Enumerate(f func(K, V)) {
+func (t *Tree[K, V]) Enumerate(f func(K, V) bool) bool {
 	if t.root == nil {
-		return
+		return true
 	}
-	t.root.enumerate(f)
+	return t.root.enumerate(f)
 }
 
 // MinKey returns the minimum key in the tree or nil if the tree is empty.
