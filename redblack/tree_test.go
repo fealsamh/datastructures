@@ -60,8 +60,9 @@ func BenchmarkRedblackTree(b *testing.B) {
 			t.Put(compString(p.fst), p.snd)
 		}
 		keys := make([]string, 0, t.Size())
-		t.Enumerate(func(k compString, _ int) {
+		t.Enumerate(func(k compString, _ int) bool {
 			keys = append(keys, string(k))
+			return true
 		})
 		lR = newPair(t, keys)
 	}

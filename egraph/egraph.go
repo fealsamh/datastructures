@@ -108,10 +108,11 @@ func (g *Graph) merge(clsID1, clsID2 *sahuaro.Tree[eClassID]) {
 	for _, cls := range cls2.parentNodes.Values() {
 		cls1.parentNodes.Insert(cls)
 	}
-	g.eClasses.Enumerate(func(id eClassID, cls *eClass) {
+	g.eClasses.Enumerate(func(id eClassID, cls *eClass) bool {
 		if cls == cls2 {
 			g.eClasses.Put(id, cls1)
 		}
+		return true
 	})
 	parentNodes := cls1.parentNodes.Values()
 	// preserving the congruence invariant
