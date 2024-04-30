@@ -23,7 +23,7 @@ func (t *Term) String() string {
 	return s
 }
 
-// Compare compares two n-ary terms using shortlex order.
+// Compare compares two n-ary terms using the shortlex order.
 func (t *Term) Compare(t2 *Term) int {
 	if c := len(t.Args) - len(t2.Args); c != 0 {
 		return c
