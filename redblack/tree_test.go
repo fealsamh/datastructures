@@ -29,11 +29,11 @@ func generateTestData() []pair[string, int] {
 	return r
 }
 
-var gR interface{}
+var gR any
 
 func BenchmarkBuiltinMap(b *testing.B) {
 	pairs := generateTestData()
-	var lR interface{}
+	var lR any
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		m := make(map[string]int)
@@ -52,7 +52,7 @@ func BenchmarkBuiltinMap(b *testing.B) {
 
 func BenchmarkRedblackTree(b *testing.B) {
 	pairs := generateTestData()
-	var lR interface{}
+	var lR any
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		t := NewTree[compString, int]()
