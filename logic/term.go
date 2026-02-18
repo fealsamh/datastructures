@@ -9,18 +9,19 @@ type Term struct {
 }
 
 func (t *Term) String() string {
-	s := t.Symbol
+	var s strings.Builder
+	s.WriteString(t.Symbol)
 	if len(t.Args) > 0 {
-		s += "("
+		s.WriteString("(")
 		for i, arg := range t.Args {
 			if i > 0 {
-				s += ","
+				s.WriteString(",")
 			}
-			s += arg.String()
+			s.WriteString(arg.String())
 		}
-		s += ")"
+		s.WriteString(")")
 	}
-	return s
+	return s.String()
 }
 
 // Compare compares two n-ary terms using the shortlex order.
